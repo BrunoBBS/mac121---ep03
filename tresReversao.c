@@ -23,9 +23,9 @@ int isSorted(int v[], int n)
 }
 
 /*A funcao recebe um vetor, seu tamanho, um indice e retorna o tipo de
- * movimento a ser utilizado para o numero desse indice, sendo 1 para
- * uma tres reversao nesse indice e 2 para uma serie de tres reversoes
- * para trocar com o numero do indice sucessor.*/
+ * movimento a ser utilizado para o numero desse indice, sendo 0 para
+ * nenhum,  1 para uma tres reversao nesse indice e 2 para uma serie de
+ * tres reversoes para trocar com o numero do indice sucessor.*/
 int movType(int v[], int n, int ind)
 {
     int a, b, c;
@@ -33,12 +33,14 @@ int movType(int v[], int n, int ind)
     b = ind + 1;
     c = ind + 2;
     /*Como v[a] não eh menor do que v[c] e v[b] ao mesmo tempo,ja que
-    * o vetor nao esta ordenado verifica se esta entre eles ou eh maior
-    * do que ambos.*/
+     * o vetor nao esta ordenado verifica se esta entre eles ou eh maior
+     * do que ambos.*/
     if ((b < n && v[a] > v[b]) && (c < n && v[a] > v[c]))
         return 2;
-    else
+    else if (v[a] > v[b])
         return 1;
+
+    return 0;
 }
 
 /*A funcao recebe um vetor, seu tamanho e um indice e faz uma sequencia de
@@ -47,8 +49,10 @@ int movType(int v[], int n, int ind)
 void swNeighbor(int v[], int n, int ind)
 {
     int i, aux = 0, bsteps, fsteps;
+    printf("vai trocar %d com %d \n", ind, ind+1);
     bsteps = (n - 1) / 2;
     fsteps = (n - 3) / 2;
+    printf("b: %d, f: %d \n", bsteps, fsteps);
     for (i = 0; i < bsteps; i++)
     {
         ind = (ind - 2) % n;
@@ -75,16 +79,21 @@ void swNeighbor(int v[], int n, int ind)
  * utilizando 3-reversao.*/
 void revSortOdd(int v[], int n, int ind)
 {
-    int i, j;
+    int i, j, move;
     if (isSorted(v, n))
         return;
     for (i = n - 2; i > 0; i--)
     {
-        for (j = 0; j < n - 2; j++)
+        for (j = 0; j < i; j++)
         {
-            if (movType(v, n, j) == 1)
+            move = movType(v, n, j);
+            if (move == 2)
+            {
                 swNeighbor(v, n, j);
-            else
+                i = n-2;
+                j = 0;
+            }
+            else if(move == 1)
             {
                 rev(v, n, j);
                 printf("3-rev: %d\n", j);
