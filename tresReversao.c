@@ -32,14 +32,15 @@ int movType(int v[], int n, int ind)
     a = ind;
     b = ind + 1;
     c = ind + 2;
-    /*Como v[a] não eh menor do que v[c] e v[b] ao mesmo tempo,ja que
-     * o vetor nao esta ordenado verifica se esta entre eles ou eh maior
-     * do que ambos.*/
-    if ((b < n && v[a] > v[b]) && (c < n && v[a] > v[c]))
-        return 2;
-    else if (v[a] > v[b])
-        return 1;
 
+    if ((a > 0 && v[a] < v[a - 1]) || (a > 1 && v[a] < v[a - 2])
+            ||(a < n - 1 && v[a] > v[b]) || (a < n - 2 && v[a] > v[c]))
+    {
+        if ((b < n && v[a] > v[b]) && (c < n && v[a] > v[c]))
+            return 1; /*Troca tres-reversao normal*/
+        else if (v[a] > v[b])
+            return 2; /*Troca com o vizinho*/
+    }
     return 0;
 }
 
@@ -48,30 +49,25 @@ int movType(int v[], int n, int ind)
  * sucessor.*/
 void swNeighbor(int v[], int n, int ind)
 {
-    int i, aux = 0, bsteps, fsteps;
-    printf("vai trocar %d com %d \n", ind, ind+1);
+    int i, bsteps, fsteps;
+    /*printf("vai trocar %d com %d \n", ind, ind+1);*/
     bsteps = (n - 1) / 2;
     fsteps = (n - 3) / 2;
-    printf("b: %d, f: %d \n", bsteps, fsteps);
+    /*printf("b: %d, f: %d \n", bsteps, fsteps);*/
     for (i = 0; i < bsteps; i++)
     {
         ind = (ind - 2) % n;
         if (ind < 0)
             ind += n;
         rev(v, n, ind);
-        printf("bstep: %d\n", ind);
-        if (i == bsteps - 1)
-            aux = ind;
+        /*printf("bstep: %d\n", ind);*/
     }
 
     for (i = 0; i < fsteps; i++)
     {
-        ind = aux;
+        ind = (ind +2) % n;
         rev(v, n, ind);
-        printf("fstep: %d\n", ind);
-        ind = (ind - 2) % n;
-        if (ind < 0)
-            ind += n;
+        /*printf("fstep: %d\n", ind);*/
     }
 }
 
@@ -79,24 +75,27 @@ void swNeighbor(int v[], int n, int ind)
  * utilizando 3-reversao.*/
 void revSortOdd(int v[], int n, int ind)
 {
-    int i, j, move;
+    int i, j, move, count = 1;
     if (isSorted(v, n))
         return;
-    for (i = n - 2; i > 0; i--)
+    for (i = n - 1; count && i > 0; i--)
     {
+        count = 0;
         for (j = 0; j < i; j++)
         {
             move = movType(v, n, j);
             if (move == 2)
             {
                 swNeighbor(v, n, j);
-                i = n-2;
+                i = n-1;
                 j = 0;
+                count++;
             }
             else if(move == 1)
             {
                 rev(v, n, j);
-                printf("3-rev: %d\n", j);
+                count++;
+                /*printf("3-rev: %d\n", j);*/
             }
         }
     }
@@ -138,17 +137,17 @@ int main()
     {
         int *steps = malloc(n * sizeof(int));
         stepn = revSortEven(v, n, steps);
-        printf("%d", stepn);
-        if (stepn > 0)
-            for (i = 0; i < stepn; i++)
-                printf("par: %d\n", steps[i]);
-        else
-            printf("Nao e possivel\n");
+        /*if (stepn > 0)*/
+        /*for (i = 0; i < stepn; i++)*/
+        /*printf("par: %d\n", steps[i]);*/
+        /*else*/
+        /*printf("Nao e possivel\n");*/
     }
     else
         revSortOdd(v, n, 0);
-    for (i = 0; i < n; i++)
-        printf("%d ", v[i]);
-    printf("\n");
+    printf("ta ordenado?: %s \n", isSorted(v, n)?"sim":"nao");
+    /*for (i = 0; i < n; i++)*/
+    /*printf("%d ", v[i]);*/
+    /*printf("\n");*/
     return 0;
 }
