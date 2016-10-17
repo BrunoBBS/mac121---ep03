@@ -1,3 +1,5 @@
+#include "pilha.h"
+#include "types.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -33,15 +35,11 @@ int movType(int v[], int n, int ind)
     b = ind + 1;
     c = ind + 2;
 
-    if ((a > 0 && v[a] < v[a - 1]) || (a > 1 && v[a] < v[a - 2])
-            ||(a < n - 1 && v[a] > v[b]) || (a < n - 2 && v[a] > v[c]))
-    {
-        if ((b < n && v[a] > v[b]) && (c < n && v[a] > v[c]))
-            return 1; /*Troca tres-reversao normal*/
-        else if (v[a] > v[b])
-            return 2; /*Troca com o vizinho*/
-    }
-    return 0;
+    if (c < n && v[a] > v[c])
+        return 1; /*Troca tres-reversao normal*/
+    else if (b < n && v[a] > v[b])
+        return 2; /*Troca com o vizinho*/
+    return 0;     /*Nao troca com ninguem*/
 }
 
 /*A funcao recebe um vetor, seu tamanho e um indice e faz uma sequencia de
@@ -50,24 +48,22 @@ int movType(int v[], int n, int ind)
 void swNeighbor(int v[], int n, int ind)
 {
     int i, bsteps, fsteps;
-    /*printf("vai trocar %d com %d \n", ind, ind+1);*/
     bsteps = (n - 1) / 2;
     fsteps = (n - 3) / 2;
-    /*printf("b: %d, f: %d \n", bsteps, fsteps);*/
     for (i = 0; i < bsteps; i++)
     {
         ind = (ind - 2) % n;
         if (ind < 0)
             ind += n;
         rev(v, n, ind);
-        /*printf("bstep: %d\n", ind);*/
+        printf("%d\n", ind);
     }
 
     for (i = 0; i < fsteps; i++)
     {
-        ind = (ind +2) % n;
+        ind = (ind + 2) % n;
         rev(v, n, ind);
-        /*printf("fstep: %d\n", ind);*/
+        printf("%d\n", ind);
     }
 }
 
@@ -87,15 +83,15 @@ void revSortOdd(int v[], int n, int ind)
             if (move == 2)
             {
                 swNeighbor(v, n, j);
-                i = n-1;
+                i = n - 1;
                 j = 0;
                 count++;
             }
-            else if(move == 1)
+            else if (move == 1)
             {
                 rev(v, n, j);
                 count++;
-                /*printf("3-rev: %d\n", j);*/
+                printf("%d\n", j);
             }
         }
     }
@@ -103,7 +99,7 @@ void revSortOdd(int v[], int n, int ind)
 
 /* Recebe o vetor, seu tamanho, e um vetor para guardar os passos e retorna o
  * numero de passos.*/
-int revSortEven(int v[], int n, int steps[])
+int revSortEven(int v[], int n, pilha *p)
 {
     int j, i, mov = 1, k = 0;
 
@@ -116,7 +112,7 @@ int revSortEven(int v[], int n, int steps[])
             if (v[j] > v[j + 2])
             {
                 rev(v, n, j);
-                steps[k] = j;
+                empilha(p, j);
                 k++;
                 mov++;
             }
@@ -125,9 +121,10 @@ int revSortEven(int v[], int n, int steps[])
     return k;
 }
 
+/*A funcao recebe as entradas do usuario e ordena o vetor caso seja possivel*/
 int main()
 {
-    int *v, n, i, stepn;
+    int *v, n, i;
     scanf("%d", &n);
     v = malloc(n * sizeof(int));
     for (i = 0; i < n; i++)
@@ -135,19 +132,16 @@ int main()
 
     if (!(n % 2))
     {
-        int *steps = malloc(n * sizeof(int));
-        stepn = revSortEven(v, n, steps);
-        /*if (stepn > 0)*/
-        /*for (i = 0; i < stepn; i++)*/
-        /*printf("par: %d\n", steps[i]);*/
-        /*else*/
-        /*printf("Nao e possivel\n");*/
+        pilha *p;
+        p = criaPilha(n);
+        revSortEven(v, n, p);
+        if (isSorted(v, n))
+            for (i = 0; i < p->topo; i++)
+                printf("%d\n", p->v[i]);
+        else
+            printf("Nao e possivel\n");
     }
     else
         revSortOdd(v, n, 0);
-    printf("ta ordenado?: %s \n", isSorted(v, n)?"sim":"nao");
-    /*for (i = 0; i < n; i++)*/
-    /*printf("%d ", v[i]);*/
-    /*printf("\n");*/
     return 0;
 }
